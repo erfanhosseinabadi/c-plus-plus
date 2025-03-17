@@ -1,12 +1,14 @@
 #include <iostream>
 #include <string>
 using namespace std;
+//creatin Node for linked list
 class Node{
     public:
     int age;
     string name;
     Node* next;
 };
+//create a function to add Node a block at the beginnig of linked list
 void front(Node**head,int var1,string var2){
     Node* newNode = new Node();
     newNode->age = var1;
@@ -14,6 +16,7 @@ void front(Node**head,int var1,string var2){
     newNode->next = *head;
     *head = newNode;
 }
+//create a function to add a Node at the end
 void end(Node**head,int var1,string var2){
     Node* newNode = new Node();
     newNode -> age = var1;
@@ -29,6 +32,7 @@ void end(Node**head,int var1,string var2){
     }
     last->next = newNode;
 }
+//function to print out the list
 void check(Node*head){
     Node* temp = head;
     while(temp != NULL){
@@ -36,6 +40,7 @@ void check(Node*head){
         temp = temp->next;
     }cout<<endl;
 }
+//add after specific
 void afternode(Node*previous,int var1,string var2){
     if(previous==NULL){
         cout<<"the previous can not be NULL"<<endl;
