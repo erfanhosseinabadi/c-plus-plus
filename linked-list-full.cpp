@@ -8,7 +8,6 @@ class Node{
     string name;
     Node* next;
 };
-//create a function to add Node a block at the beginnig of linked list
 void addfront(Node**head,int var1,int var2,string var3){
     Node* newNode = new Node();
     newNode->age = var1;
@@ -17,7 +16,6 @@ void addfront(Node**head,int var1,int var2,string var3){
     newNode->next = *head;
     *head = newNode;
 }
-//create a function to add a Node at the end
 void addend(Node**head,int var1,int var2,string var3){
     Node* newNode = new Node();
     newNode -> age = var1;
