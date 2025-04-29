@@ -2,21 +2,49 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "Build GLFW Program",
             "type": "shell",
             "command": "g++",
             "args": [
                 "-g",
-                "${file}", // Builds the currently open file
+                "${file}",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}.exe" // Outputs the .exe in the same folder as the .cpp file
+                "${fileDirname}/${fileBasenameNoExtension}.exe",
+                "-I", "C:/vcpkg/installed/x64-windows/include",
+                "-L", "C:/vcpkg/installed/x64-windows/lib",
+                "-lglfw3",
+                "-lopengl32",
+                "-lgdi32"
             ],
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
             "problemMatcher": ["$gcc"],
-            "detail": "Generated task by VS Code"
+            "detail": "Builds GLFW applications with OpenGL"
+        },
+        {
+            "label": "Build Debug",
+            "type": "cppbuild",
+            "command": "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-I", "C:/vcpkg/installed/x64-windows/include",
+                "-L", "C:/vcpkg/installed/x64-windows/lib",
+                "-lglfw3",
+                "-lopengl32",
+                "-lgdi32"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": ["$gcc"],
+            "group": "build",
+            "detail": "Debug build with MSYS2 GCC"
         }
     ]
 }
