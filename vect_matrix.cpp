@@ -41,7 +41,7 @@ public:
     }
     return result;
    }
-   vector operator=(const vector& other){
+   vector& operator=(const vector& other){
     if(&other == this){
         return this;
     }
@@ -82,7 +82,7 @@ class matrix {
                 delete[] mat[i];
             }
             delete[] mat;
-            cout << "matrix destroyed" << endl;  // Fixed message
+            cout << "matrix destroyed" << endl; 
         }
     
         matrix(const matrix& other) : rows(other.rows), cols(other.cols) {
