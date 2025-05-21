@@ -7,174 +7,103 @@
 using namespace std;
 
 class Vector {
-private:
+protected:
     vector<double> data;
 public:
     Vector(int size = 0) : data(size, 0.0) {}
-
-    int size() const {
-        return data.size();
-    }
-
-    double& operator[](int i) {
-        return data[i];
-    }
-
-    const double& operator[](int i) const {
-        return data[i];
-    }
+    int size() const { return data.size(); }
+    double& operator[](int i) { return data[i]; }
+    const double& operator[](int i) const { return data[i]; }
 };
 
-void printVector(const Vector& v) {
-    cout << "[ ";
-    for (int i = 0; i < v.size(); ++i)
-        cout << v[i] << " ";
-    cout << "]" << endl;
-}
-
-
 class Matrix {
-private:
+protected:
     vector<vector<double> > data;
 public:
     Matrix(int rows = 0, int cols = 0) : data(rows, vector<double>(cols, 0.0)) {}
-
-    int rows() const {
-        return data.size();
-    }
-
-    int cols() const {
-        if (data.empty()) {
-            return 0;
-        } else {
-            return data[0].size();
-        }
-    }
-
-    vector<double>& operator[](int index) {
-        return data[index];
-    }
-
-    const vector<double>& operator[](int index) const {
-        return data[index];
-    }
+    int rows() const { return data.size(); }
+    int cols() const { return data.empty() ? 0 : data[0].size(); }
+    vector<double>& operator[](int i) { return data[i]; }
+    const vector<double>& operator[](int i) const { return data[i]; }
 };
 
-void printMatrix(const Matrix& m) {
-    for (int i = 0; i < m.rows(); ++i) {
-        for (int j = 0; j < m.cols(); ++j)
-            cout << m[i][j] << " ";
-        cout << endl;
-    }
-}
-
-Vector multiplyMatrixVector(const Matrix& A, const Vector& v) {
-    int n = A.rows();
-    Vector result(n);
-
-    for (int i = 0; i < n; ++i) {
-        double sum = 0;
-        for (int j = 0; j < A.cols(); ++j) {
-            sum += A[i][j] * v[j];
-        }
-        result[i] = sum;
-    }
-
+Vector multiply(const Matrix& A, const Vector& v) {
+    Vector result(A.rows());
+    for (int i = 0; i < A.rows(); ++i)
+        for (int j = 0; j < A.cols(); ++j)
+            result[i] += A[i][j] * v[j];
     return result;
 }
 
-Vector jacobi(const Matrix& A, const Vector& B, const Vector& x0,
-              double tolerance, int max_iterations, int& iterations) {
+Vector jacobi(const Matrix& A, const Vector& B, const Vector& x0, double tol, int max_iter, int& iters) {
     int n = A.rows();
-    Vector x = x0;
-    Vector x_new(n);
-
-    for (iterations = 0; iterations < max_iterations; ++iterations) {
+    Vector x = x0, x_new(n);
+    for (iters = 0; iters < max_iter; ++iters) {
         for (int i = 0; i < n; ++i) {
-            double sigma = 0;
-            for (int j = 0; j < n; ++j) {
-                if (j != i) {
-                    sigma += A[i][j] * x[j];
-                }
-            }
-            x_new[i] = (B[i] - sigma) / A[i][i];
+            double sum = 0;
+            for (int j = 0; j < n; ++j)
+                if (j != i) sum += A[i][j] * x[j];
+            x_new[i] = (B[i] - sum) / A[i][i];
         }
 
-        double diff = 0;
+        double max_diff = 0;
         for (int i = 0; i < n; ++i) {
-            double err = abs(x_new[i] - x[i]);
-            if (err > diff) {
-                diff = err;
-            }
+            double diff = fabs(x_new[i] - x[i]);
+            if (diff > max_diff)
+                max_diff = diff;
         }
-
-        if (diff < tolerance) {
-            break;
-        }
-
+        if (max_diff < tol) break;
         x = x_new;
     }
-
+    
     return x;
 }
 
 void generateProblem(Matrix& A, Vector& B, Vector& x_true) {
     static bool seeded = false;
-    if (!seeded) {
-        srand((unsigned)time(0));
-        seeded = true;
-    }
+    if (!seeded) { srand((unsigned)time(0)); seeded = true; }
 
     int n = A.rows();
+    for (int i = 0; i < n; ++i)
+        x_true[i] = rand() % 10 + 1;
 
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            A[i][j] = (rand() % 1000 - 500) / 500.0;
-        }
-        A[i][i] *= 100; 
-    }
-    for (int i = 0; i < n; ++i) {
-        x_true[i] = (rand() % 1000 - 500) / 500.0;
-    }
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            A[i][j] = (i == j) ? rand() % 10 + n * 5 : rand() % 10;
 
-    B = multiplyMatrixVector(A, x_true);
+    B = multiply(A, x_true);
 }
 
 int main() {
-    const double tolerance = 1e-6;
-    const int max_iterations = 100000;
+    const double tol = 1e-6;
+    const int max_iter = 100000;
 
     vector<int> sizes;
     sizes.push_back(2);
     sizes.push_back(5);
     sizes.push_back(10);
 
-    for (size_t i = 0; i < sizes.size(); ++i) {
-        int size = sizes[i];
+    for (int k = 0; k < (int)sizes.size(); ++k) {
+        int size = sizes[k];
 
         Matrix A(size, size);
         Vector x_true(size), B(size), x0(size);
 
         generateProblem(A, B, x_true);
-
-        for (int i = 0; i < size; ++i) {
+        for (int i = 0; i < size; ++i)
             x0[i] = 0.0;
-        }
 
-        int iterations;
-        Vector solution = jacobi(A, B, x0, tolerance, max_iterations, iterations);
+        int iters;
+        Vector x = jacobi(A, B, x0, tol, max_iter, iters);
 
-        double max_error = 0.0;
+        double max_error = 0;
         for (int i = 0; i < size; ++i) {
-            double error = abs(solution[i] - x_true[i]);
-            if (error > max_error) {
+            double error = fabs(x[i] - x_true[i]);
+            if (error > max_error)
                 max_error = error;
-            }
         }
 
-        cout << "Size: " << size << endl;
-        cout << "Iterations: " << iterations << endl;
-        cout << "Max Error: " << max_error << endl << endl;
+        cout << "Size: " << size << "\nIterations: " << iters << "\nMax Error: " << max_error << "\n\n";
     }
 
     return 0;
